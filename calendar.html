@@ -1,31 +1,50 @@
+<!-- calendar.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <title>소비 달력</title>
 <style>
-body{font-family:Arial; background:#FFF5F7; text-align:center;}
-.calendar{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; max-width:600px; margin:auto;}
-.day{background:white; padding:10px; border-radius:10px;}
+body{font-family:Arial; background:#FFF5F7; padding:30px;}
+h1{text-align:center; color:#FF8FA3; margin-bottom:20px;}
+.calendar{display:grid; grid-template-columns:repeat(7,1fr); gap:12px; max-width:700px; margin:auto;}
+.day{background:white; border-radius:15px; padding:15px; min-height:80px; box-shadow:0 4px 10px rgba(0,0,0,0.05);} 
+.date{font-weight:bold; margin-bottom:8px;}
+.money{color:#FF8FA3; font-size:14px;}
 </style>
 </head>
 <body>
-<h1>📅 소비 달력</h1>
+<h1>📅 2026년 5월 소비 달력</h1>
 <div class="calendar" id="cal"></div>
 
 <script>
 const params = new URLSearchParams(location.search);
-const food = params.get('food');
-const cafe = params.get('cafe');
-const budget = params.get('budget');
+const budget = +params.get('budget');
+const food = +params.get('food');
+const cafe = +params.get('cafe');
 
-const daily = (budget*(+food+ +cafe)/100)/30;
+// 👉 식비+카페 = 하루 소비 기준
+const daily = (budget * (food + cafe) / 100) / 30;
 
-for(let i=1;i<=30;i++){
- let div=document.createElement('div');
+// 2026년 5월 시작 요일 (금요일 = 5)
+const startDay = 5;
+const days = 31;
+
+const cal = document.getElementById('cal');
+
+for(let i=0;i<startDay;i++){
+ let empty = document.createElement('div');
+ cal.appendChild(empty);
+}
+
+for(let i=1;i<=days;i++){
+ let div = document.createElement('div');
  div.className='day';
- div.innerHTML = `${i}일<br>💸 ${Math.round(daily)}원`;
- document.getElementById('cal').appendChild(div);
+ div.innerHTML = `
+ <div class="date">${i}</div>
+ <div class="money">🍙+☕ 하루 예산<br>${Math.round(daily)}원</div>
+ `;
+ cal.appendChild(div);
 }
 </script>
 </body>
