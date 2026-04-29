@@ -5,142 +5,100 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎀 소비 코치</title>
 <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background: #FFF5F7;
-        margin: 0;
-        padding: 20px;
-    }
-
-    .container {
-        max-width: 600px;
-        margin: auto;
-        background: white;
-        padding: 20px;
-        border-radius: 20px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-        text-align: center;
-        color: #FF8FA3;
-    }
-
-    .input-box {
-        margin: 15px 0;
-    }
-
-    input[type="number"] {
-        width: 100%;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-    }
-
-    .slider-box {
-        margin: 15px 0;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    input[type="range"] {
-        width: 100%;
-    }
-
-    .result {
-        margin-top: 20px;
-        padding: 15px;
-        background: #F0FFF5;
-        border-radius: 15px;
-    }
-
-    .category {
-        margin-bottom: 10px;
-    }
+body {font-family: Arial; background:#FFF5F7; margin:0; padding:20px;}
+.container {max-width:600px; margin:auto; background:white; padding:20px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);} 
+h1{text-align:center; color:#FF8FA3;}
+input[type=number]{width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;}
+.slider-box{margin:10px 0;}
+.result{margin-top:20px; padding:15px; background:#F0FFF5; border-radius:15px;}
+button{width:100%; padding:10px; margin-top:10px; border:none; border-radius:10px; background:#FFB6C1; color:white; font-size:16px;}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>💸 나의 소비 코치</h1>
+<h1>💸 나의 소비 코치</h1>
 
-    <div class="input-box">
-        <label>월 예산 입력 (원)</label>
-        <input type="number" id="budget" placeholder="예: 800000">
-    </div>
+<label>월 예산 입력</label>
+<input type="number" id="budget">
 
-    <div class="slider-box">
-        <label>🍙 식비: <span id="foodPercent">30</span>%</label>
-        <input type="range" min="0" max="100" value="30" id="food">
-    </div>
+<div class="slider-box">🍙 식비 <span id="foodP">30</span>%
+<input type="range" id="food" value="30"></div>
+<div class="slider-box">☕ 카페 <span id="cafeP">20</span>%
+<input type="range" id="cafe" value="20"></div>
+<div class="slider-box">🛍 쇼핑 <span id="shopP">20</span>%
+<input type="range" id="shop" value="20"></div>
+<div class="slider-box">🚇 교통 <span id="transP">15</span>%
+<input type="range" id="trans" value="15"></div>
+<div class="slider-box">🎀 기타 <span id="etcP">15</span>%
+<input type="range" id="etc" value="15"></div>
 
-    <div class="slider-box">
-        <label>☕ 카페: <span id="cafePercent">20</span>%</label>
-        <input type="range" min="0" max="100" value="20" id="cafe">
-    </div>
+<button onclick="calculate()">계산하기</button>
+<button onclick="goCalendar()">📅 소비 달력 보기</button>
 
-    <div class="slider-box">
-        <label>🛍 쇼핑: <span id="shopPercent">20</span>%</label>
-        <input type="range" min="0" max="100" value="20" id="shop">
-    </div>
-
-    <div class="slider-box">
-        <label>🚇 교통: <span id="transportPercent">15</span>%</label>
-        <input type="range" min="0" max="100" value="15" id="transport">
-    </div>
-
-    <div class="slider-box">
-        <label>🎀 기타: <span id="etcPercent">15</span>%</label>
-        <input type="range" min="0" max="100" value="15" id="etc">
-    </div>
-
-    <button onclick="calculate()" style="width:100%; padding:10px; border:none; border-radius:10px; background:#FFB6C1; color:white; font-size:16px;">계산하기</button>
-
-    <div class="result" id="result"></div>
+<div class="result" id="result"></div>
 </div>
 
 <script>
-    const sliders = ['food','cafe','shop','transport','etc'];
+const ids = ['food','cafe','shop','trans','etc'];
 
-    sliders.forEach(id => {
-        document.getElementById(id).addEventListener('input', function() {
-            document.getElementById(id+'Percent').innerText = this.value;
-        });
+// 🔥 총합 100 자동 맞추기
+ids.forEach(id=>{
+ document.getElementById(id).addEventListener('input', function(){
+  let total = 0;
+  ids.forEach(i=> total += +document.getElementById(i).value);
+
+  let diff = total - 100;
+
+  if(diff !== 0){
+    let others = ids.filter(i=> i!==id);
+    others.forEach(i=>{
+      let val = +document.getElementById(i).value;
+      val -= diff/(others.length);
+      val = Math.max(0, Math.min(100,val));
+      document.getElementById(i).value = val;
     });
+  }
 
-    function calculate() {
-        const budget = document.getElementById('budget').value;
-        if (!budget) return alert('예산을 입력해주세요!');
+  ids.forEach(i=>{
+    document.getElementById(i+'P').innerText = Math.round(document.getElementById(i).value);
+  });
+ });
+});
 
-        let totalPercent = 0;
-        sliders.forEach(id => {
-            totalPercent += parseInt(document.getElementById(id).value);
-        });
+function calculate(){
+ const budget = document.getElementById('budget').value;
+ if(!budget) return alert('예산 입력!');
 
-        if (totalPercent !== 100) {
-            alert('비율의 합이 100%가 되어야 합니다!');
-            return;
-        }
+ let result='';
 
-        let resultHTML = '';
+ ids.forEach(id=>{
+  let percent = document.getElementById(id).value;
+  let amount = budget * percent / 100;
 
-        sliders.forEach(id => {
-            const percent = document.getElementById(id).value;
-            const amount = budget * percent / 100;
-            const daily = amount / 30;
+  if(id==='food'||id==='cafe'){
+    let daily = amount/30;
+    result += `<div>${id}: ${Math.round(amount)}원 (하루 ${Math.round(daily)}원)</div>`;
+  } else {
+    result += `<div>${id}: ${Math.round(amount)}원 (월 기준)</div>`;
+  }
+ });
 
-            resultHTML += `
-                <div class="category">
-                    <b>${id}</b>: ${Math.round(amount)}원 (하루 ${Math.round(daily)}원)
-                </div>
-            `;
-        });
+ document.getElementById('result').innerHTML = result;
+}
 
-        document.getElementById('result').innerHTML = resultHTML;
-    }
+// 📅 달력 페이지 이동
+function goCalendar(){
+ const budget = document.getElementById('budget').value;
+ if(!budget) return alert('먼저 계산하세요!');
+
+ let params = `?budget=${budget}`;
+ ids.forEach(id=>{
+  params += `&${id}=${document.getElementById(id).value}`;
+ });
+
+ window.location.href = 'calendar.html'+params;
+}
 </script>
 
 </body>
