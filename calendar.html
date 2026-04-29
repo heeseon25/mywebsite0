@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>소비 달력</title>
+<style>
+body{font-family:Arial; background:#FFF5F7; text-align:center;}
+.calendar{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; max-width:600px; margin:auto;}
+.day{background:white; padding:10px; border-radius:10px;}
+</style>
+</head>
+<body>
+<h1>📅 소비 달력</h1>
+<div class="calendar" id="cal"></div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const food = params.get('food');
+const cafe = params.get('cafe');
+const budget = params.get('budget');
+
+const daily = (budget*(+food+ +cafe)/100)/30;
+
+for(let i=1;i<=30;i++){
+ let div=document.createElement('div');
+ div.className='day';
+ div.innerHTML = `${i}일<br>💸 ${Math.round(daily)}원`;
+ document.getElementById('cal').appendChild(div);
+}
+</script>
+</body>
+</html>
