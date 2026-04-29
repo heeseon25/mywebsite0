@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎀 소비 코치</title>
 <style>
-body {font-family: Arial; background:#FFF5F7; margin:0; padding:20px;}
-.container {max-width:600px; margin:auto; background:white; padding:20px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);} 
-h1{text-align:center; color:#FF8FA3;}
-input[type=number]{width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;}
-.slider-box{margin:10px 0;}
-.result{margin-top:20px; padding:15px; background:#F0FFF5; border-radius:15px;}
-button{width:100%; padding:10px; margin-top:10px; border:none; border-radius:10px; background:#FFB6C1; color:white; font-size:16px;}
+body {font-family: Arial; background:#FFF5F7; margin:0; padding:40px;}
+.container {max-width:600px; margin:auto; background:white; padding:30px; border-radius:25px; box-shadow:0 8px 20px rgba(0,0,0,0.08);} 
+h1{text-align:center; color:#FF8FA3; margin-bottom:30px;}
+input[type=number]{width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:20px;}
+.slider-box{margin:25px 0;}
+.slider-box label{display:flex; justify-content:space-between; margin-bottom:8px;}
+input[type=range]{width:100%;}
+.result{margin-top:25px; padding:20px; background:#F8FFF9; border-radius:20px;}
+button{width:100%; padding:12px; margin-top:15px; border:none; border-radius:12px; background:#FFB6C1; color:white; font-size:16px; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -22,16 +24,32 @@ button{width:100%; padding:10px; margin-top:10px; border:none; border-radius:10p
 <label>월 예산 입력</label>
 <input type="number" id="budget">
 
-<div class="slider-box">🍙 식비 <span id="foodP">30</span>%
-<input type="range" id="food" value="30"></div>
-<div class="slider-box">☕ 카페 <span id="cafeP">20</span>%
-<input type="range" id="cafe" value="20"></div>
-<div class="slider-box">🛍 쇼핑 <span id="shopP">20</span>%
-<input type="range" id="shop" value="20"></div>
-<div class="slider-box">🚇 교통 <span id="transP">15</span>%
-<input type="range" id="trans" value="15"></div>
-<div class="slider-box">🎀 기타 <span id="etcP">15</span>%
-<input type="range" id="etc" value="15"></div>
+<div class="slider-box">
+<label>🍙 식비 <span id="foodP">30%</span></label>
+<input type="range" id="food" value="30" oninput="update()">
+</div>
+
+<div class="slider-box">
+<label>☕ 카페 <span id="cafeP">20%</span></label>
+<input type="range" id="cafe" value="20" oninput="update()">
+</div>
+
+<div class="slider-box">
+<label>🛍 쇼핑 <span id="shopP">20%</span></label>
+<input type="range" id="shop" value="20" oninput="update()">
+</div>
+
+<div class="slider-box">
+<label>🚇 교통 <span id="transP">15%</span></label>
+<input type="range" id="trans" value="15" oninput="update()">
+</div>
+
+<div class="slider-box">
+<label>🎀 기타 <span id="etcP">15%</span></label>
+<input type="range" id="etc" value="15" oninput="update()">
+</div>
+
+<p style="text-align:center; color:#999;">👉 나머지 비율은 자동 계산됩니다</p>
 
 <button onclick="calculate()">계산하기</button>
 <button onclick="goCalendar()">📅 소비 달력 보기</button>
@@ -40,68 +58,50 @@ button{width:100%; padding:10px; margin-top:10px; border:none; border-radius:10p
 </div>
 
 <script>
-const ids = ['food','cafe','shop','trans','etc'];
+function update(){
+ const food = +document.getElementById('food').value;
+ const cafe = +document.getElementById('cafe').value;
+ const shop = +document.getElementById('shop').value;
+ const trans = +document.getElementById('trans').value;
 
-// 🔥 총합 100 자동 맞추기
-ids.forEach(id=>{
- document.getElementById(id).addEventListener('input', function(){
-  let total = 0;
-  ids.forEach(i=> total += +document.getElementById(i).value);
+ let etc = 100 - (food + cafe + shop + trans);
+ etc = Math.max(0, etc);
+ document.getElementById('etc').value = etc;
 
-  let diff = total - 100;
-
-  if(diff !== 0){
-    let others = ids.filter(i=> i!==id);
-    others.forEach(i=>{
-      let val = +document.getElementById(i).value;
-      val -= diff/(others.length);
-      val = Math.max(0, Math.min(100,val));
-      document.getElementById(i).value = val;
-    });
-  }
-
-  ids.forEach(i=>{
-    document.getElementById(i+'P').innerText = Math.round(document.getElementById(i).value);
-  });
- });
-});
+ document.getElementById('foodP').innerText = food+'%';
+ document.getElementById('cafeP').innerText = cafe+'%';
+ document.getElementById('shopP').innerText = shop+'%';
+ document.getElementById('transP').innerText = trans+'%';
+ document.getElementById('etcP').innerText = etc+'%';
+}
 
 function calculate(){
  const budget = document.getElementById('budget').value;
  if(!budget) return alert('예산 입력!');
 
- let result='';
+ const food = budget * document.getElementById('food').value / 100;
+ const cafe = budget * document.getElementById('cafe').value / 100;
+ const shop = budget * document.getElementById('shop').value / 100;
+ const trans = budget * document.getElementById('trans').value / 100;
+ const etc = budget * document.getElementById('etc').value / 100;
 
- ids.forEach(id=>{
-  let percent = document.getElementById(id).value;
-  let amount = budget * percent / 100;
-
-  if(id==='food'||id==='cafe'){
-    let daily = amount/30;
-    result += `<div>${id}: ${Math.round(amount)}원 (하루 ${Math.round(daily)}원)</div>`;
-  } else {
-    result += `<div>${id}: ${Math.round(amount)}원 (월 기준)</div>`;
-  }
- });
-
- document.getElementById('result').innerHTML = result;
+ document.getElementById('result').innerHTML = `
+ 🍙 식비: ${Math.round(food)}원 (하루 ${Math.round(food/30)}원)<br>
+ ☕ 카페: ${Math.round(cafe)}원 (하루 ${Math.round(cafe/30)}원)<br>
+ 🛍 쇼핑: ${Math.round(shop)}원 (월)<br>
+ 🚇 교통: ${Math.round(trans)}원 (월)<br>
+ 🎀 기타: ${Math.round(etc)}원 (월)
+ `;
 }
 
-// 📅 달력 페이지 이동
 function goCalendar(){
  const budget = document.getElementById('budget').value;
- if(!budget) return alert('먼저 계산하세요!');
+ const food = document.getElementById('food').value;
+ const cafe = document.getElementById('cafe').value;
 
- let params = `?budget=${budget}`;
- ids.forEach(id=>{
-  params += `&${id}=${document.getElementById(id).value}`;
- });
-
- window.location.href = 'calendar.html'+params;
+ window.location.href = `calendar.html?budget=${budget}&food=${food}&cafe=${cafe}`;
 }
 </script>
 
-</body>
-</html>
 </body>
 </html>
